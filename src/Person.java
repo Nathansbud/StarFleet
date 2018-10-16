@@ -12,7 +12,6 @@ public class Person {
         MECHANIC
     }
 
-
     private String name;
 
     private int stats[] = new int[4];

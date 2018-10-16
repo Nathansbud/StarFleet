@@ -10,7 +10,12 @@ public class Ship {
     private static int SHIP_NUMBER = 1;
 
     private String name;
-    private int stats[] = new int[]{0,0,0,0};
+
+    private int stats[];
+    private String statNames[] = {
+            "HP", "DEF", "ATT", "SPD"
+    };
+
     private int number;
 
     Ship(String _name, int[] _stats) {
@@ -47,6 +52,10 @@ public class Ship {
         stats[index] = _stat;
     }
 
+    public String getStatName(int index) {
+        return statNames[index];
+    }
+
     public int getHealth() {
         return stats[0];
     }
@@ -58,7 +67,7 @@ public class Ship {
         return stats[1];
     }
     public void setArmor(int _armor) {
-        stats[0] = _armor;
+        stats[1] = _armor;
     }
 
     public int getDamage() {return stats[2];}
