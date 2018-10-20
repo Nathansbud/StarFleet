@@ -16,13 +16,44 @@ public class Ship {
             "HP", "DEF", "ATT", "SPD"
     };
 
-    private int number;
+    private int number = 0;
+    private int reward = 0;
 
     Ship(String _name, int[] _stats) {
         name = _name;
         stats = _stats;
         number = SHIP_NUMBER++;
     }
+
+    Ship(String _name, int[] _stats, int _reward) {
+        name = _name;
+        stats = _stats;
+        reward = _reward;
+    }
+
+
+    //Print Functions
+    public void print() {
+        System.out.print("Ship #" + number + ": " + name);
+        for(int i = 0; i < stats.length; i++) {
+            System.out.print(" | " + stats[i] + " " + statNames[i]);
+        }
+        System.out.println();
+    }
+
+    public void battlePrint() {
+        if(number > 0) {
+            System.out.print("Player: " + name);
+        } else {
+            System.out.print("Enemy: " + name);
+        }
+        for(int i = 0; i < stats.length; i++) {
+            System.out.print(" | " + stats[i] + " " + statNames[i]);
+        }
+        System.out.println();
+    }
+
+    //Get/Set Functions
 
     public String getName() {
         return name;
@@ -55,7 +86,6 @@ public class Ship {
     public String getStatName(int index) {
         return statNames[index];
     }
-
     public int getHealth() {
         return stats[0];
     }
@@ -80,4 +110,7 @@ public class Ship {
         stats[3] = _speed;
     }
 
+    public int getReward() {
+        return reward;
+    }
 }

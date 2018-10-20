@@ -11,12 +11,27 @@ public class StarFleet {
     private static int menuState = 2;
     private static boolean isInt = false;
 
+    private static boolean isOnMission = false;
+
+    private static int shipChoice = 0;
+
+    private static int missionDifficulty = 3;
+    private static int missionChoice = 0;
+
+
+
     private static String menu[][] = {
             {"Error Zone"}, //0, Error Handle Zone!!!
             {"Quit?", "Yes", "No"}, //1, Quit Zone
             {"Hub", "Hangar", "Barracks", "Blacksmith"}, //2, Hub Area
             {"Hangar", "Upgrade", "Embark"}, //3, Hull Options
-            {"Barracks", "Testing", "123"}  //4, Barracks
+            {"Upgrade"}, //4, Upgrade Menu
+            {"Upgrade Ship"}, //5, Upgrade Ship
+            {"Mission Embark", "Short", "Medium", "Long"}, //6, Mission Embark
+            {"Mission Embark (Ship Choice)"}, //Mission Embark (Ship Choice) {title will be overwritten}
+            {"Mission Confirmation", "Yes", "No"},
+            {"Mission"},
+            {"Mission Results"}
     };
 
     private static String dict[] = {
@@ -24,6 +39,7 @@ public class StarFleet {
             "/quit",
             "x",
             "/showfleet",
+            "/back",
             "/dev_rs", //<shipNum: int>
             "/dev_as", //<shipName: string> <health: int> <def: int> <att: int> <spd: int>
             "/dev_pickmeup"
@@ -45,7 +61,7 @@ public class StarFleet {
         do {
             System.out.println("Is it...");
             s = sc.nextLine();
-            System.out.println("Ah, yes, \"" + s + "\" your my name...right?");
+            System.out.println("Ah, yes, \"" + s + "\" is your name...right?");
             System.out.println();
             System.out.println("1: Yes, 100%!");
             System.out.println("2: No, that's not quite it...");
@@ -78,20 +94,65 @@ public class StarFleet {
             }
         } while(!p);
 
-        g.addShip(new Ship("SS Dad Bod",  new int[]{100, 50, 10, 10}));
+        g.addShip(new Ship(s,  new int[]{100, 50, 10, 10}));
     }
 
 
     public static void main(String[] args) {
         g = new GameManager();
+//        intro();
         g.addShip(new Ship("SS Dad Bod", new int[]{100, 50, 10, 10}));
+        g.addShip(new Ship("SS Didgeridad", new int[]{100, 50, 10, 10}));
+        g.addShip(new Ship("SS Dongerbois", new int[]{100, 50, 10, 10}));
+        g.setPlayerName("Zack");
+
+        menu[2][0] = (g.getPlayerName().charAt(g.getPlayerName().length() - 1) == ('s')) ?
+                (g.getPlayerName() + "' Starfleet") :
+                (g.getPlayerName() + "'s Starfleet");
+
         menuHistory.push(1);
 
-        while(true) {
+        menuState = 8;
+
+        boolean game = true;
+
+        while(game) {
             System.out.println("["+menu[menuState][0]+"]");
+            System.out.println("Menu State: " + menuState);
+            System.out.println();
             switch(menuState) {
                 case 3:
                     g.printFleet();
+                    System.out.println();
+                    break;
+                case 4:
+                    g.printUpdate();
+                    System.out.println();
+                    break;
+                case 5:
+                    g.printCredits();
+                    g.getShip(shipChoice).print();
+                    System.out.println();
+                    break;
+                case 6:
+                    g.printFleet();
+                    System.out.println();
+                    break;
+                case 7:
+                    g.printFleet();
+                    System.out.println();
+                    System.out.println("Which ship would you like to choose?");
+                    System.out.println();
+                    break;
+                case 8:
+                    System.out.println("Mission Length: " + menu[6][missionDifficulty]);
+                    g.getShip(shipChoice).print();
+                    System.out.println();
+                    break;
+                case 9:
+                    g.printMission(missionDifficulty, missionChoice, shipChoice);
+                    break;
+                case 10:
                     break;
                 default:
                     break;
@@ -99,29 +160,37 @@ public class StarFleet {
 
             generateMenu(menuState);
             String c;
-            if(menuState > 0) {
-                c = dataInput(1, menu[menuState].length - 1);
-            } else {
-                c = "0";
+
+            switch(menuState) {
+                case 0:
+                case 9:
+                case 10:
+                    c = "0";
+                    isInt = true;
+                    break;
+                default:
+                    c = dataInput(1, menu[menuState].length - 1);
+                    break;
             }
+
             int choice;
 
             if(isInt) {
                 choice = Integer.parseInt(c);
 
                 switch (menuState) {
-                    case 1:
+                    case 1: //Exit Menu
                         switch (choice) {
                             case 2:
                                 menuHistory.push(menuState);
                                 menuState = 2;
                                 break;
                             default:
-                                System.exit(0);
+                                game = false;
                                 break;
                         }
                         break;
-                    case 2:
+                    case 2: //Main Menu
                         switch (choice) {
                             case -1:
                                 menuState = menuHistory.pop();
@@ -145,18 +214,18 @@ public class StarFleet {
                         }
                         break;
 
-                    case 3:
+                    case 3: //Hanger
                         switch (choice) {
                             case -1:
                                 menuState = menuHistory.pop();
                                 break;
                             case 1:
                                 menuHistory.push(menuState);
-                                menuState = 0;
+                                menuState = 4;
                                 break;
                             case 2:
                                 menuHistory.push(menuState);
-                                menuState = 0;
+                                menuState = 6;
                                 break;
                             default:
                                 menuHistory.push(menuState);
@@ -164,35 +233,110 @@ public class StarFleet {
                                 break;
                         }
                         break;
-                    case 4:
+                    case 4: //Upgrade
+                        switch(choice) {
+                            case -1:
+                                menuState = menuHistory.pop();
+                                break;
+                            default:
+                                if(choice > 0) {
+                                    if(choice <= g.getShipCount()) {
+                                        shipChoice = choice - 1;
+                                        menuHistory.push(menuState);
+                                        menuState = 5;
+                                    }
+                                } else {
+                                    System.out.println("Ship choice must be a valid option!");
+                                }
+                                break;
+                        }
+                        break;
+                    case 5: //Upgrade Ship
+                        switch(choice) {
+                            case -1:
+                                menuState = menuHistory.pop();
+                                break;
+                            default:
+                                g.getShip(shipChoice);
+                                break;
+                        }
+                        break;
+                    case 6:
                         switch(choice) {
                             case -1:
                                 menuState = menuHistory.pop();
                                 break;
                             default:
                                 menuHistory.push(menuState);
-                                menuState = 0;
+                                menuState = 7;
+                                menu[menuState][0] = menu[6][choice] + " Mission";
+                                missionDifficulty = choice;
+                                missionChoice = ((int)(Math.random()*(g.getMissions(missionDifficulty).length)));
                                 break;
                         }
                         break;
-                    default:
-                        System.out.println("YOU HAVE ENTERED THE SUPER SECRET ZONE!!!!");
-                        System.out.println("pranked i just have programmed this screen yet/you typed the wrong thing!!");
-                        System.out.println("Redirecting you to previous screen...");
+                    case 7:
+                        switch(choice) {
+                            case -1:
+                                menuState = menuHistory.pop();
+                                break;
+                            default:
+                                if (choice > 0 && choice <= g.getShipCount()) {
+                                    shipChoice = choice - 1;
+                                    menuHistory.push(menuState);
+                                    menuState = 8;
+                                } else {
+                                    System.out.println("Ship choice must be a valid option!");
+                                }
+                                break;
+                        }
+                        break;
+                    case 8:
+                        switch(choice) {
+                            case -1:
+                                menuState = menuHistory.pop();
+                                break;
+                            case 1:
+                                menuHistory.push(menuState);
+                                menuState = 9;
+                                menu[9][0] = g.getMission(missionDifficulty, missionChoice);
+                                break;
+                            case 2:
+                                menuHistory.pop();
+                                menuState = menuHistory.pop();
+                                break;
+                        }
+                        break;
+                    case 9:
+                        menuState = 10;
+                        break;
+                    case 10:
+                        menuState = 2;
+                        break;
+                    default: //Error Zone
+                        System.out.println("Unfinished screen! Redirecting to previous screen...");
                         menuState = menuHistory.pop();
                         break;
                 }
             } else {
-                String[] a = c.split("\\s");
-
-                switch(a[0]) {
+                String[] command = c.split("\\s");
+                switch(command[0]) {
+                    case "/dev_sc":
+                        if(command.length == 1) {
+                            try {
+                                g.setCredits(Integer.parseInt(command[1]));
+                            } catch(NumberFormatException e) {
+                                System.out.println("/dev_sc must take an a credit amount as input!");
+                            }
+                        }
+                        break;
                     case "/dev_pickmeup":
                         System.out.println("Code not working? That sucks, man. Feel free to take a break if you need it!");
                         break;
                     case "/dev_rs":
-                        if (a.length > 1) {
+                        if (command.length > 1) {
                             try {
-                                g.removeShip(Integer.parseInt(a[1]));
+                                g.removeShip(Integer.parseInt(command[1]));
                             } catch (NumberFormatException e) {
                                 System.out.println("/dev_rs must take an index as input!");
                             }
@@ -201,9 +345,9 @@ public class StarFleet {
                         }
                         break;
                     case "/dev_as":
-                        if(a.length == 6) {
+                        if(command.length == 6) {
                             try {
-                                g.addShip(new Ship(a[1], new int[]{Integer.parseInt(a[2]), Integer.parseInt(a[3]), Integer.parseInt(a[4]), Integer.parseInt(a[5])}));
+                                g.addShip(new Ship(command[1], new int[]{Integer.parseInt(command[2]), Integer.parseInt(command[3]), Integer.parseInt(command[4]), Integer.parseInt(command[5])}));
                             } catch(NumberFormatException e) {
                                 System.out.println("/dev_as must take a string followed by 4 ints as inputs!");
                             }
@@ -212,7 +356,7 @@ public class StarFleet {
                         }
                         break;
                     case "/help":
-                        if(a.length > 1) {
+                        if(command.length > 1) {
                             System.out.println("This command takes no arguments!");
                         } else {
                             System.out.println("{Help}");
@@ -221,15 +365,18 @@ public class StarFleet {
                             }
                         }
                         break;
+                    case "/back":
+                        menuState = menuHistory.pop();
+                        break;
                     case "/quit":
                     case "x":
-                        System.exit(0);
+                        game = false;
                         break;
                     case "/showfleet":
                         g.printFleet();
                         break;
                     default:
-                        System.out.println("UNIMPLEMENTED");
+                        System.out.println("Inputs must be a valid choice, or /help");
                         break;
                 }
             }
@@ -246,39 +393,33 @@ public class StarFleet {
             System.out.println();
         }
     }
-
     private static String dataInput(int min, int max) {
         System.out.print("Choose: ");
         String s;
-        boolean passed = false;
+        isInt = false;
 
-        do {
-            s = sc.nextLine();
-            try {
-                int x = Integer.parseInt(s);
-                if((!(x < min) && !(x > max)) || x == -1) {
+        s = sc.nextLine();
+        try {
+            int x = Integer.parseInt(s);
+            if(max > min) {
+                if ((!(x < min) && !(x > max)) || x == -1) {
                     isInt = true;
-                    passed = true;
                 }
-            } catch(NumberFormatException e) {
-                for(String d : dict) {
-                    s = s.toLowerCase();
-                    String a[] = s.split("\\s");
-                    if(a[0].equals(d)) {
-                        isInt = false;
-                        passed = true;
-                    }
+            } else {
+                isInt = true;
+            }
+        } catch(NumberFormatException e) {
+            for(String d : dict) {
+                s = s.toLowerCase();
+                String a[] = s.split("\\s");
+                if(a[0].equals(d)) {
+                    isInt = false;
                 }
             }
-            if(!passed) {
-                System.out.println("Your choice must be between " + min + " and " + max + ", or a valid command! For a list of commands, type /help");
-            }
-
-        } while(!passed);
+        }
 
         return s;
     }
-
     public static int getBoundedIntChoice(int min, int max) {
         System.out.print("Choose: ");
         int r;
@@ -298,6 +439,4 @@ public class StarFleet {
 
         return r;
     }
-
-
 }
