@@ -114,7 +114,7 @@ public class GameManager {
 
     public boolean battle(Ship a, Ship b) {
         int turn = 1;
-        float dialogueWaitTime = 0;
+        float dialogueWaitTime = 3;
 
         boolean success = false;
         boolean isBattle = true;
@@ -154,13 +154,14 @@ public class GameManager {
                         dialogue(s[j].getName() + " loses " + (armor[j] - s[j].getArmor()) + " points of armor!", dialogueWaitTime, true);
                     } else if(armor[j] > 0 && s[j].getHealth() == hp[j]) {
                         dialogue(s[j].getName() + " loses " + (armor[j]) + " points of armor, breaking its armor!", dialogueWaitTime, true);
-                    } else if(armor[j] > 0) {
+                    } else if(armor[j] > 0 && (hp[j] - s[j].getHealth()) > 0) {
                         dialogue(s[j].getName() + " loses " + (armor[j]) + " points of armor, breaking its armor, and " + (hp[j] - s[j].getHealth()) + " health!", dialogueWaitTime, true);
-                    } else if(s[j].getHealth() > 0) {
-                        dialogue(s[j].getName() + " loses " + (hp[j] - s[j].getHealth()) + " health!", dialogueWaitTime, true);
                     } else {
-                        dialogue(s[j].getName() + " loses " + (hp[j] - s[j].getHealth()) + " health, and is destroyed!", dialogueWaitTime, true);
-                        if(s[i].getNumber() > 0) {
+                        dialogue(s[j].getName() + " loses " + (hp[j] - s[j].getHealth()) + " health!", dialogueWaitTime, true);
+                    }
+
+                    if(s[j].getHealth() < 0) {
+                        if (s[i].getNumber() > 0) {
                             s[i].battlePrint();
                             dialogue("Received " + s[j].getReward() + " credits!", dialogueWaitTime, false);
                             credits += s[j].getReward();
