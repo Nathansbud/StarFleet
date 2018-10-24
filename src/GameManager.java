@@ -7,7 +7,11 @@ public class GameManager {
     private String[] missions[] = {
             {"Uranium Mining Expedition", "Short 2", "Short 3"}, //Short
             {"Sargaid Retrieval", "Med 2", "Med 3"}, //Medium
-            {"X'argon Raid", "Long 2", "Long 3"} //Long
+            {"X'argon Raid"} //Long
+    };
+
+    private String[] randomNames = {
+            "Kilbane", "Meme Machine", "7 PLS", "Gracious Professionalism", "Taco $ Umpfri"
     };
 
     //Game Loop
@@ -20,16 +24,7 @@ public class GameManager {
 
     public void printFleet() {
         for(Ship s : ships) {
-            System.out.print("Ship #" + s.getNumber() + ": " + s.getName());
-            if(ships.length > 1) {
-                for(int i = s.getName().length(); i < getLongestShipName(); i++) {
-                    System.out.print(" ");
-                }
-            }
-            for(int i = 0; i < s.getStats().length; i++) {
-                System.out.print(" | " + s.getStat(i) + " " + s.getStatName(i));
-            }
-            System.out.println();
+            s.print();
         }
     }
     public void printUpdate() {
@@ -39,6 +34,34 @@ public class GameManager {
         System.out.println();
         System.out.println("Which ship would you like to choose?");
     }
+
+    public int[] printRepairs() {
+        printCredits();
+
+        int[] needsRepair = new int[0];
+        boolean shouldPrint = false;
+
+        for(int i = 0; i < ships.length; i++) {
+            for (int j = 0; j < ships[i].getStats().length; j++) {
+
+                if(ships[i].getStat(j) < ships[i].getMaxStat(j)) {
+                    shouldPrint = true;
+                }
+            }
+            if(shouldPrint) {
+                ships[i].print();
+                int temp[] = new int[needsRepair.length+1];
+                for (int k = 0; k < needsRepair.length; k++) {
+                    temp[k] = needsRepair[k];
+                }
+
+                temp[needsRepair.length] = i;
+                needsRepair = temp;
+            }
+        }
+
+        return needsRepair;
+    }
     public void printCredits() {
         System.out.println("Credits: " + credits);
     }
@@ -46,28 +69,9 @@ public class GameManager {
         ships[index].print();
     }
 
+
     public void printMission(int difficulty, int mission, int ship) {
         switch(difficulty) {
-            case 1:
-                switch(mission) {
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 2:
-                switch(mission) {
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    default:
-                        break;
-                }
-                break;
             case 3:
                 switch(mission) {
                     case 0:
@@ -97,15 +101,28 @@ public class GameManager {
                             removeShip(ships[ship].getNumber());
                             break;
                         }
-                        break;
-                    case 1:
+
+                        dialogue("Breaking the 4th wall, the creator of the game realizes he has a math test to study for, and that he has no time to write out missions!", 3.5f, false);
+                        dialogue("As such, it's time to face...the big boss, the embodiment of all evil: procrastination!", 5f, false);
+                        dialogue("No, seriously.", 3f, false);
+                        dialogue("This isn't even a joke, it literally has 1 attack damage, incredibly high dodge, and incredibly high health. It can do nothing but stall you and make you question your life choices", 5f, false);
+                        dialogue("And you can't even quit combat. Have fun!", 3f, false);
+                        Ship procrastination = new Ship("I Should Be Studying For My Math Test", new int[]{125, 0, 0, 40}, 500);
+                        if(!battle(ships[ship], procrastination)) {
+                            removeShip(ships[ship].getNumber());
+                            break;
+                        }
+                        dialogue("You waited for that? Truly, you are the greatest hero. Go buy yourself something nice!", 3.5f, true);
                         break;
                     default:
                         break;
                 }
                 break;
             default:
-                System.out.println("this shouldn't happen");
+                dialogue("I am lazy and did not make missions. So, like, here's 100 credits, go buy yourself something nice!", 3.5f, true);
+                dialogue("Also apparently adding a ship is one of the requirements, which is awkward since I have nothing that does that. Here, have a free ship!", 3.5f, true);
+                addShip(new Ship("SS " + randomNames[(int)(Math.random()*randomNames.length)], new int[]{125, 15, 15, 8}));
+                credits+=100;
                 break;
         }
     }
@@ -114,7 +131,7 @@ public class GameManager {
 
     public boolean battle(Ship a, Ship b) {
         int turn = 1;
-        float dialogueWaitTime = 3;
+        float dialogueWaitTime = 2.5f;
 
         boolean success = false;
         boolean isBattle = true;
@@ -163,6 +180,7 @@ public class GameManager {
                     if(s[j].getHealth() < 0) {
                         if (s[i].getNumber() > 0) {
                             s[i].battlePrint();
+                            dialogue( s[j].getName() + " was destroyed!", 1.5f, false);
                             dialogue("Received " + s[j].getReward() + " credits!", dialogueWaitTime, false);
                             credits += s[j].getReward();
                             success = true;

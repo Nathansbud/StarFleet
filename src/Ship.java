@@ -1,3 +1,5 @@
+import java.lang.reflect.Array;
+
 public class Ship {
     /*
         Stats:
@@ -12,8 +14,14 @@ public class Ship {
     private String name;
 
     private int stats[];
-    private String statNames[] = {
+    private int maxStats[];
+
+    private static String statNames[] = {
             "HP", "DEF", "ATT", "SPD"
+    };
+
+    private static int repairCosts[] = {
+            2, 5, 10, 10
     };
 
     private int number = 0;
@@ -21,13 +29,17 @@ public class Ship {
 
     Ship(String _name, int[] _stats) {
         name = _name;
-        stats = _stats;
+        stats = _stats.clone();
+        maxStats = _stats.clone();
+
         number = SHIP_NUMBER++;
     }
 
     Ship(String _name, int[] _stats, int _reward) {
         name = _name;
-        stats = _stats;
+
+        stats = _stats.clone();
+        maxStats = _stats.clone();
         reward = _reward;
     }
 
@@ -36,7 +48,7 @@ public class Ship {
     public void print() {
         System.out.print("Ship #" + number + ": " + name);
         for(int i = 0; i < stats.length; i++) {
-            System.out.print(" | " + stats[i] + " " + statNames[i]);
+            System.out.print(" | " + stats[i] + "/" + maxStats[i] + " " + statNames[i]);
         }
         System.out.println();
     }
@@ -83,9 +95,17 @@ public class Ship {
         stats[index] = _stat;
     }
 
-    public String getStatName(int index) {
+    public int[] getMaxStats() {
+        return maxStats;
+    }
+    public int getMaxStat(int index) {
+        return maxStats[index];
+    }
+
+    public static String getStatName(int index) {
         return statNames[index];
     }
+
     public int getHealth() {
         return stats[0];
     }
@@ -112,5 +132,13 @@ public class Ship {
 
     public int getReward() {
         return reward;
+    }
+
+    public boolean hasLostStat(int index) {
+        return stats[index] < maxStats[index];
+    }
+
+    public static int getRepairCost(int index) {
+        return repairCosts[index];
     }
 }
