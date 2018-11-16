@@ -1,5 +1,3 @@
-import java.lang.reflect.Array;
-
 public class Ship {
     /*
         Stats:
@@ -22,6 +20,10 @@ public class Ship {
 
     private static int repairCosts[] = {
             2, 5, 10, 10
+    };
+
+    private int upgradeCosts[] = {
+            20, 50, 100, 100
     };
 
     private int number = 0;
@@ -102,6 +104,14 @@ public class Ship {
         return maxStats[index];
     }
 
+    public void setMaxStats(int[] _maxStats) {
+        maxStats = _maxStats;
+    }
+    public void setMaxStat(int index, int _stat) {
+        maxStats[index] = _stat;
+    }
+
+
     public static String getStatName(int index) {
         return statNames[index];
     }
@@ -137,8 +147,21 @@ public class Ship {
     public boolean hasLostStat(int index) {
         return stats[index] < maxStats[index];
     }
+    public int lostStatCount() {
+        int c = 0;
+        for (int i = 0; i < stats.length; i++) {
+            if(hasLostStat(i)) {
+                c++;
+            }
+        }
+        return c;
+    }
 
     public static int getRepairCost(int index) {
         return repairCosts[index];
     }
+    public int getUpgradeCost(int index) {
+        return upgradeCosts[index];
+    }
+
 }

@@ -7,17 +7,15 @@ public class StarFleet {
     private static Scanner sc = new Scanner(System.in);
     private static GameManager g;
 
-    private static Stack<Integer> menuHistory = new Stack<Integer>();
-    private static int menuState = 3;
-    private static boolean isInt = false;
+    private static Stack<Integer> menuHistory = new Stack<Integer>(); //Menu state stack
+    private static int menuState = 3; //State used as the stack marker
+    private static boolean isInt = false; //Boolean to check if input should change screen state or be a command
 
-    private static int shipChoice = 0;
-    private static int shipChoices[];
+    private static int shipChoice = 0; //Choice used for ship (upgrades/missions)
+    private static int shipChoices[]; //Array used for ships during repair selection
 
-    private static int missionDifficulty = 3;
+    private static int missionDifficulty = 0;
     private static int missionChoice = 0;
-
-
 
     private static String menu[][] = {
             {"Error Zone"}, //0, Error Handle Zone!!!
@@ -25,7 +23,7 @@ public class StarFleet {
             {"Hub", "Hangar", "Barracks", "Blacksmith"}, //2, Hub Area
             {"Hangar", "Upgrade", "Embark", "Repair"}, //3, Hull Options
             {"Upgrade"}, //4, Upgrade Menu
-            {"Upgrade Ship"}, //5, Upgrade Ship
+            {"Upgrade Ship", "Health (20 Credits)", "Defense (40 Credits)", "Attack (100 Credits)", "Speed (100 Credits)"}, //5, Upgrade Ship
             {"Mission Embark", "Short", "Medium", "Long"}, //6, Mission Embark
             {"Mission Embark (Ship Choice)"}, //7, Mission Embark (Ship Choice) {Title Overwritten}
             {"Mission Confirmation", "Yes", "No"}, //8, Mission Confirm
@@ -33,7 +31,7 @@ public class StarFleet {
             {"Mission Summary"}, //10, Mission Return
             {"Ship Repair"}, //11, Ship Repair Menu
             {"Ship Repair (Ship Choice)"} //12, Repair Menu
-    };
+    }; //Ship menu options (indexed by menuState)
 
     private static String dict[] = {
             "/help",
@@ -44,7 +42,7 @@ public class StarFleet {
             "/dev_rs", //<shipNum: int>
             "/dev_as", //<shipName: string> <health: int> <def: int> <att: int> <spd: int>
             "/dev_pickmeup"
-    };
+    }; //Recognized command list
 
     private static String dictExplanation[] = {
             "Displays a list of all available commands available, along with their arguments.",
@@ -55,7 +53,7 @@ public class StarFleet {
             "Removes ship by ship number; takes 1 integer argument [/dev_rs <shipNum: int>]",
             "Adds a ship to your fleet; takes 5 arguments [/dev_as <shipName: String> <hp: int> <def: int> <att: int> <spd: int>]",
             "Picks you up!"
-    };
+    }; //Explanations for commands
 
     public static void intro() {
         System.out.println("You're woken up by the smell of smoke, and the sound of static in your ear. To your left, a ship, wing bent in an awkward direction.");
@@ -82,7 +80,7 @@ public class StarFleet {
         g.setPlayerName(s);
         System.out.println("Yes, it's all coming back to you now...the mission, the crash, the...other...crew members?");
         do {
-            System.out.println("The ship...it was named...");
+            System.out.println("Your ship...it was named...");
             s = sc.nextLine();
             System.out.println("Ah, yes, \"" + s + "\"...right?");
             System.out.println();
@@ -99,6 +97,7 @@ public class StarFleet {
         } while(!p);
 
         g.addShip(new Ship(s,  new int[]{100, 50, 10, 10}));
+
     }
 
 
@@ -108,7 +107,7 @@ public class StarFleet {
         g.addShip(new Ship("SS Didgeridad", new int[]{100, 50, 10, 10}));
         g.addShip(new Ship("SS Dongerbois", new int[]{150, 50, 20, 20}));
 
-        g.setPlayerName("Zack");
+        g.setPlayerName("John");
 
         menu[2][0] = (g.getPlayerName().charAt(g.getPlayerName().length() - 1) == ('s')) ?
                 (g.getPlayerName() + "' Starfleet") :
@@ -120,7 +119,6 @@ public class StarFleet {
         g.getShip(1).setStat(0, 1);
 
         boolean game = true;
-
         while(game) {
             System.out.println("["+menu[menuState][0]+"]");
             System.out.println("Menu State: " + menuState);
@@ -134,20 +132,41 @@ public class StarFleet {
                     System.out.println();
                     break;
                 case 4:
+                    if(g.getShips().length == 0) {
+                        System.out.println("You have no ships! Get back to the Hangar...");
+                        menuState = 3;
+                        break;
+                    }
                     g.printUpdate();
                     System.out.println();
                     break;
                 case 5:
+                    if(g.getShips().length == 0) {
+                        System.out.println("You have no ships! Get back to the Hangar...");
+                        menuState = 3;
+                        break;
+                    }
                     g.printCredits();
                     g.getShip(shipChoice).print();
+
                     System.out.println();
                     break;
                 case 6:
-                    g.printFleet();
+                    if(g.getShips().length > 0) {
+                        g.printFleet();
+                    } else {
+                        menuState = 3;
+                        System.out.println("You have no ship! Back to the Hangar...");
+                        break;
+                    }
                     System.out.println();
                     break;
                 case 7:
-                    g.printFleet();
+                    if(g.getShips().length > 0) {
+                        g.printFleet();
+                    } else {
+                        menuState = 3;
+                    }
                     System.out.println();
                     System.out.println("Which ship would you like to choose?");
                     break;
@@ -181,10 +200,9 @@ public class StarFleet {
                     System.out.println();
                     System.out.println("Which part of the ship would you like to repair?");
                     System.out.println();
-                    int counter = 1;
                     for(int i = 0; i < g.getShip(shipChoice).getStats().length; i++) {
                         if(g.getShip(shipChoice).hasLostStat(i)) {
-                            System.out.println(counter++ + ". " + Ship.getStatName(i) + " (" + Ship.getRepairCost(i) + " Credits/Point)");
+                            System.out.println((i+1) + ". " + Ship.getStatName(i) + " (" + Ship.getRepairCost(i) + " Credits/Point)");
                         }
                     }
                     break;
@@ -227,8 +245,13 @@ public class StarFleet {
                     case 2: //Main Menu
                         break;
                     case 3: //Hanger
+                        if(g.getShips().length == 0){
+                            System.out.println("You have no ships! Here, I have pity on you, take this pity ship!");
+                            g.addShip(new Ship("SS Pity", new int[]{100, 50, 10, 10}));
+                            break;
+                        }
                         switch (choice) {
-                            case -1:
+                           case -1:
                                 menuState = menuHistory.pop();
                                 break;
                             case 1:
@@ -273,7 +296,25 @@ public class StarFleet {
                                 menuState = menuHistory.pop();
                                 break;
                             default:
-                                g.getShip(shipChoice);
+                                if((g.getCredits() - g.getShip(shipChoice).getUpgradeCost(choice - 1)) >= 0) {
+                                    g.setCredits(g.getCredits() - g.getShip(shipChoice).getUpgradeCost(choice - 1));
+
+                                    g.getShip(shipChoice).setMaxStat(choice - 1, g.getShip(shipChoice).getMaxStat(choice - 1)+1);
+                                    g.getShip(shipChoice).setStat(choice - 1, g.getShip(shipChoice).getStat(choice - 1) + 1);
+                                } else {
+                                    boolean canAffordAnything = false;
+                                    for(int i = 0; i < g.getShip(shipChoice).getStats().length; i++) {
+                                        if(g.getCredits() > g.getShip(shipChoice).getUpgradeCost(i)) {
+                                            canAffordAnything = true;
+                                        }
+                                    }
+                                    if(canAffordAnything) {
+                                        System.out.println("You can't afford this upgrade!");
+                                    } else {
+                                        System.out.println("You can't afford anything!");
+                                    }
+                                }
+
                                 break;
                         }
                         break;
@@ -347,6 +388,34 @@ public class StarFleet {
                         break;
 
                     case 12:
+                        switch(choice) {
+                            case -1:
+                                menuState = menuHistory.pop();
+                                break;
+                            default:
+                                if(choice <= g.getShip(shipChoice).lostStatCount() && choice > 0) {
+                                    int lostStat = -1;
+                                    for (int i = 0; i < g.getShip(shipChoice).getStats().length; i++) {
+                                        if (g.getShip(shipChoice).hasLostStat(i)) {
+                                            lostStat++;
+                                        }
+
+                                        if (lostStat == (choice - 1)) {
+                                            if (g.getCredits() >= g.getShip(shipChoice).getRepairCost(lostStat)) {
+                                                g.setCredits(g.getCredits() - g.getShip(shipChoice).getRepairCost(lostStat));
+                                                System.out.println(Ship.getStatName(lostStat) + " repaired (" + g.getShip(shipChoice).getStat(lostStat) + " -> "+ (g.getShip(shipChoice).getStat(lostStat)+1) + ")");
+                                                g.getShip(shipChoice).setStat(lostStat, g.getShip(shipChoice).getStat(lostStat) + 1);
+
+                                            } else {
+                                                System.out.println("You cannot afford that!");
+                                            }
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    System.out.println("Stat choice must be a valid option!");
+                                }
+                        }
                         break;
                     default: //Error Zone
                         System.out.println("Unfinished screen! Redirecting to previous screen...");

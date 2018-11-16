@@ -8,17 +8,11 @@ public class GameManager {
             {"Uranium Mining Expedition", "Short 2", "Short 3"}, //Short
             {"Sargaid Retrieval", "Med 2", "Med 3"}, //Medium
             {"X'argon Raid"} //Long
-    };
+    }; //Mission names, indexed by missionChoice
 
     private String[] randomNames = {
             "Kilbane", "Meme Machine", "7 PLS", "Gracious Professionalism", "Taco $ Umpfri"
-    };
-
-    //Game Loop
-
-    void Update() {
-
-    }
+    }; //Random names for ships gained from missions
 
     //Print Output
 
@@ -43,9 +37,9 @@ public class GameManager {
 
         for(int i = 0; i < ships.length; i++) {
             for (int j = 0; j < ships[i].getStats().length; j++) {
-
                 if(ships[i].getStat(j) < ships[i].getMaxStat(j)) {
                     shouldPrint = true;
+                    break;
                 }
             }
             if(shouldPrint) {
@@ -57,6 +51,7 @@ public class GameManager {
 
                 temp[needsRepair.length] = i;
                 needsRepair = temp;
+                shouldPrint = false;
             }
         }
 
@@ -243,6 +238,7 @@ public class GameManager {
         t[ships.length] = s;
         ships = t;
     }
+
     public void removeShip(int shipNumber) {
         int removeIndex = -1;
 
